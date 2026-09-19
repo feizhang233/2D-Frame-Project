@@ -2,7 +2,7 @@
 
 # Frame Studio / frame2d
 
-**在浏览器里直接画刚架、跑分析、看 N / V / M 图。**
+**在浏览器里绘制二维与三维刚架、进行线性静力分析、查看位移与杆件内力。**
 
 React 工作台 · FastAPI · Python 有限元核心
 
@@ -21,6 +21,15 @@ React 工作台 · FastAPI · Python 有限元核心
 ---
 
 ## 快速开始
+
+仓库新增 **3D 线性静力数学核心** `frame3d`，支持 EB/Timoshenko 空间梁、端部释放、
+非零支座位移、六类截面内力，以及独立数值和接口测试。现有后端新增
+`POST /api/v1/3d/solve`，也可独立启动 `frame3d.api:app`。
+详见 [3D 数学与接口说明](docs/FRAME3D_MATH_CORE.md) 和
+[请求示例](examples/cantilever_3d.json)。浏览器左上角可切换 **2D / 3D**。
+3D 支持 XY / XZ / YZ 工作平面与偏移、平面/空间双视图、连续画杆和 XYZ 精确坐标建模，
+以及截面、材料、支座、荷载、变形和六类内力结果。
+详见 [3D 工作台操作说明](docs/FRAME3D_WORKBENCH.zh-CN.md)。
 
 **必需环境：** Python `3.11+` · Node.js `20.19+` 或 `22.12+` · npm<br>
 **可选环境：** Docker，用于通过 MySQL 提供账号与用户私有模型存储
@@ -56,7 +65,7 @@ npm run dev
 
 终端里按 `Ctrl+C` 会同时停掉前后端。MySQL 会继续在 Docker 中运行，可用 `docker compose stop mysql` 停止。
 
-> 建模和求解不依赖 Docker。MySQL 不可用时，网站仍可以游客模式正常使用，但注册、登录和模型保存不可用；游客模型不会写入浏览器本地存储。
+> 建模和求解不依赖 Docker。MySQL 不可用时，注册、登录和 2D 云端保存不可用；2D 游客模型不会写入浏览器本地存储。3D 工作区独立使用浏览器本地草稿和 JSON 导入/导出，不依赖账号。
 
 > **第一次打开会看到什么？**  
 > 内置示例 **Portal frame 01**（门式刚架 + 均布荷载）。点右上角 **Run Analysis**，底部 Results 即可切换位移、反力、轴力、剪力、弯矩。

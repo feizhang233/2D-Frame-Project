@@ -480,17 +480,17 @@ export function ModelCanvas({
         >
           <defs>
             <pattern id="minor-grid" width={view.scale / 4} height={view.scale / 4} patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x % (view.scale / 4)} ${view.y % (view.scale / 4)})`}>
-              <path d={`M ${view.scale / 4} 0 L 0 0 0 ${view.scale / 4}`} fill="none" stroke="#dce3ec" strokeWidth="0.7" />
+              <path d={`M ${view.scale / 4} 0 L 0 0 0 ${view.scale / 4}`} fill="none" stroke="var(--mui-palette-divider)" strokeWidth="0.7" />
             </pattern>
             <pattern id="major-grid" width={view.scale} height={view.scale} patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x % view.scale} ${view.y % view.scale})`}>
               <rect width={view.scale} height={view.scale} fill="url(#minor-grid)" />
-              <path d={`M ${view.scale} 0 L 0 0 0 ${view.scale}`} fill="none" stroke="#c8d2df" strokeWidth="1" />
+              <path d={`M ${view.scale} 0 L 0 0 0 ${view.scale}`} fill="none" stroke="var(--mui-palette-grey-300)" strokeWidth="1" />
             </pattern>
             <marker id="load-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M 0 0 L 8 4 L 0 8 z" fill="#d34f61" />
             </marker>
           </defs>
-          <rect width={CANVAS_WIDTH} height={CANVAS_HEIGHT} fill="#f8fafc" />
+          <rect width={CANVAS_WIDTH} height={CANVAS_HEIGHT} fill="var(--mui-palette-grey-50)" />
           <rect width={CANVAS_WIDTH} height={CANVAS_HEIGHT} fill="url(#major-grid)" opacity="0.72" />
 
           <g className="global-axes" pointerEvents="none">

@@ -21,6 +21,9 @@ import { TOOL_HINTS } from '../guidance/workflow'
 interface ToolRailProps {
   activeTool: ToolMode
   onToolChange: (tool: ToolMode) => void
+  onSelectDoubleClick?: () => void
+  dimension?: '2D' | '3D'
+  bottomLabel?: string
 }
 
 interface ToolDefinition {
@@ -51,10 +54,14 @@ function ToolButton({
   tool,
   active,
   onClick,
+  onDoubleClick,
+  dimension = '2D',
 }: {
   tool: ToolDefinition
   active: boolean
   onClick: () => void
+  onDoubleClick?: () => void
+  dimension?: '2D' | '3D'
 }) {
   const Icon = tool.icon
   const hint = TOOL_HINTS[tool.id]
@@ -64,7 +71,7 @@ function ToolButton({
         <Box>
           <Typography variant="subtitle2">{tool.label} ({tool.shortcut})</Typography>
           <Typography variant="caption" display="block">
-            {hint.body}
+            {tool.id === 'select' ? 'Click to select. Double-click to hide or show Properties.' : dimension === '3D' ? `Open ${tool.label.toLowerCase()} tools for the spatial model.` : hint.body}
           </Typography>
         </Box>
       }
@@ -74,6 +81,8 @@ function ToolButton({
       <ListItemButton
         selected={active}
         onClick={onClick}
+        onDoubleClick={onDoubleClick}
+        aria-label={tool.label}
         aria-pressed={active}
         sx={{
           flex: '0 0 auto',
@@ -87,10 +96,10 @@ function ToolButton({
           maxHeight: 72,
           height: 64,
           '&.Mui-selected': {
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
+            bgcolor: 'primary.light',
+            color: 'primary.dark',
             '& .MuiListItemIcon-root': { color: 'inherit' },
-            '&:hover': { bgcolor: 'primary.dark' },
+            '&:hover': { bgcolor: 'primary.light' },
           },
         }}
       >
@@ -113,11 +122,11 @@ function ToolButton({
   )
 }
 
-export function ToolRail({ activeTool, onToolChange }: ToolRailProps) {
+export function ToolRail({ activeTool, onToolChange, onSelectDoubleClick, dimension = '2D', bottomLabel }: ToolRailProps) {
   return (
     <Box
       component="nav"
-      aria-label="Modeling tools"
+      aria-label={`${dimension} modeling tools`}
       sx={{
         width: { xs: 64, sm: 88 },
         height: '100%',
@@ -166,15 +175,18 @@ export function ToolRail({ activeTool, onToolChange }: ToolRailProps) {
             tool={tool}
             active={activeTool === tool.id || (tool.id === 'node' && activeTool === 'insert-node')}
             onClick={() => onToolChange(tool.id)}
+            onDoubleClick={tool.id === 'select' ? onSelectDoubleClick : undefined}
+            dimension={dimension}
           />
         ))}
       </List>
       <Box sx={{ flex: '0 0 auto', pt: 1, mt: 'auto' }}>
         <Divider sx={{ mb: 1 }} />
         <ToolButton
-          tool={modelTool}
+          tool={bottomLabel ? { ...modelTool, label: bottomLabel } : modelTool}
           active={activeTool === 'models'}
           onClick={() => onToolChange('models')}
+          dimension={dimension}
         />
       </Box>
     </Box>

@@ -2,7 +2,7 @@
 
 # Frame Studio / frame2d
 
-**Model 2D frames, run linear-static analysis, and inspect N / V / M — in the browser.**
+**Model 2D and 3D frames, run linear-static analysis, and inspect displacements and member forces in the browser.**
 
 React workbench · FastAPI · Python FE core
 
@@ -21,6 +21,16 @@ React workbench · FastAPI · Python FE core
 ---
 
 ## Quick start
+
+The repository also includes a **3D linear-static mathematical core** in `frame3d`,
+with EB/Timoshenko space beams, releases, prescribed displacements, six section
+actions, and independent numerical/API regressions. Use `POST /api/v1/3d/solve`
+on the existing backend, or run `frame3d.api:app` separately. See the
+[3D mathematics and API contract](docs/FRAME3D_MATH_CORE.md) and
+[example request](examples/cantilever_3d.json). Switch between **2D / 3D** at the top left.
+The 3D workbench provides XY/XZ/YZ planes with offsets, synchronized plane/spatial views,
+continuous member drawing, exact XYZ input, assignments, deformed shapes and six force diagrams.
+See the [3D workbench guide](docs/FRAME3D_WORKBENCH.zh-CN.md).
 
 **Requirements:** Python `3.11+` · Node.js `20.19+` or `22.12+` · npm<br>
 **Optional:** Docker, for accounts and private model storage in MySQL
@@ -56,7 +66,7 @@ Open in the browser:
 
 `Ctrl+C` stops both development processes. MySQL keeps running in Docker; stop it with `docker compose stop mysql`.
 
-> Docker is not required for modeling or solving. Without MySQL, the site remains usable in guest mode, but registration, login, and model saving are unavailable. Guest models are never persisted to browser storage.
+> Docker is not required for modeling or solving. Without MySQL, registration, login, and 2D cloud saving are unavailable; 2D guest models are not persisted to browser storage. The independent 3D workspace uses a local browser draft and JSON import/export without an account.
 
 > **What you see first**  
 > The workbench opens with **Portal frame 01**. Click **Run Analysis** to see displacements, reactions, axial force, shear, and bending moment. More ready-to-run examples are available under **Models**.

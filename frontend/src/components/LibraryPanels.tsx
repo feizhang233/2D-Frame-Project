@@ -1,8 +1,8 @@
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import AddIcon from '@mui/icons-material/Add'
+import CheckIcon from '@mui/icons-material/Check'
 import CategoryIcon from '@mui/icons-material/Category'
 import ChangeHistoryIcon from '@mui/icons-material/ChangeHistory'
-import CheckIcon from '@mui/icons-material/Check'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
@@ -35,6 +35,7 @@ import {
   type ToolMode,
 } from '../domain/frame'
 import type { ModelAction } from '../state/modelReducer'
+import { ElementAssignmentPanel } from './ElementAssignmentPanel'
 
 function scientific(value: number) {
   return value.toExponential(3)
@@ -66,7 +67,7 @@ function LibraryNumberField({
   )
 }
 
-function LibraryHeader({
+export function LibraryHeader({
   icon,
   eyebrow,
   title,
@@ -116,52 +117,17 @@ function AssignmentList({
   }
   const overlayActive = assignmentOverlay === kind
 
-  return (
-    <section className="library-apply-section" data-assignment-overlay-keep>
-      <div className="library-section-title">
-        <div><span>ASSIGNMENT</span><strong>Apply to elements</strong></div>
-        <button type="button" onClick={onApplyAll}><CheckIcon sx={{ fontSize: 16 }} /> Apply all</button>
-      </div>
-      <div className="element-assignment-list">
-        {model.elements.length === 0 && <div className="library-empty-inline">Create an element before assigning properties.</div>}
-        {model.elements.map((element) => {
-          const currentId = kind === 'material' ? element.material_id : element.section_id
-          const isAssignedHere = currentId === assignedId
-          const isAssignedOther = currentId != null && currentId !== assignedId
-          const otherName = isAssignedOther ? resolveName(currentId) : null
-          const className = isAssignedHere ? 'is-assigned' : isAssignedOther ? 'is-assigned-other' : ''
-          return (
-            <button
-              key={element.id}
-              type="button"
-              className={className}
-              title={isAssignedOther ? `Currently ${otherName}. Click to reassign.` : isAssignedHere ? 'Already assigned' : 'Apply selected definition'}
-              onClick={() => onApply(element.id)}
-            >
-              <span className="assignment-element">E{element.id}</span>
-              <span>
-                {isAssignedHere ? (
-                  <><CheckIcon sx={{ fontSize: 14 }} /> Assigned</>
-                ) : isAssignedOther ? (
-                  otherName
-                ) : (
-                  'Apply'
-                )}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-      <button
-        type="button"
-        className={`assignment-details-footer ${overlayActive ? 'is-active' : ''}`}
-        aria-pressed={overlayActive}
-        onClick={() => onToggleAssignmentOverlay(kind)}
-      >
-        More details
-      </button>
-    </section>
-  )
+  return <ElementAssignmentPanel kind={kind} onApply={onApply} onApplyAll={onApplyAll}
+    rows={model.elements.map(element => {
+      const currentId = kind === 'material' ? element.material_id : element.section_id
+      const assigned = currentId === assignedId
+      const other = currentId != null && !assigned
+      const otherName = other ? resolveName(currentId) : null
+      return { id: element.id, assigned, other, label: assigned ? 'Assigned' : otherName ?? 'Apply',
+        title: other ? `Currently ${otherName}. Click to reassign.` : assigned ? 'Already assigned' : 'Apply selected definition' }
+    })}
+    footer={<button type="button" className={`assignment-details-footer ${overlayActive ? 'is-active' : ''}`} aria-pressed={overlayActive} onClick={() => onToggleAssignmentOverlay(kind)}>More details</button>}
+  />
 }
 
 function LibrarySelectBar({

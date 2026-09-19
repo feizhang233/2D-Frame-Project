@@ -41,6 +41,9 @@ import { modelReducer, type ModelAction } from './state/modelReducer'
 import type { MessageSeverity } from './types/ui'
 import { readBrowserStorage, writeBrowserStorage } from './utils/browserStorage'
 import { downloadModelFile } from './utils/modelFile'
+import { ConfirmProvider, useConfirm } from './components/ConfirmProvider'
+import { SpatialWorkbench } from './spatial/SpatialWorkbench'
+import './spatial/spatial.css'
 
 type AnalysisState = 'idle' | 'running' | 'success' | 'error'
 
@@ -63,6 +66,20 @@ function loadGuidanceVisible(): boolean {
 }
 
 export default function App() {
+  const [dimension, setDimension] = useState<'2D' | '3D'>(() => readBrowserStorage('frame-studio.dimension') === '3D' ? '3D' : '2D')
+  const [spatialMounted, setSpatialMounted] = useState(dimension === '3D')
+  const changeDimension = (value: '2D' | '3D') => {
+    setDimension(value); if (value === '3D') setSpatialMounted(true)
+    writeBrowserStorage('frame-studio.dimension', value)
+  }
+  return <ConfirmProvider>
+    <div hidden={dimension !== '2D'}><Frame2DWorkbench active={dimension === '2D'} onDimensionChange={changeDimension} /></div>
+    {spatialMounted && <div hidden={dimension !== '3D'}><SpatialWorkbench active={dimension === '3D'} onDimensionChange={changeDimension} /></div>}
+  </ConfirmProvider>
+}
+
+function Frame2DWorkbench({ active, onDimensionChange }: { active: boolean; onDimensionChange: (value: '2D' | '3D') => void }) {
+  const confirm = useConfirm()
   const [model, baseDispatch] = useReducer(modelReducer, undefined, cloneExample)
   const [activeTool, setActiveTool] = useState<ToolMode>('select')
   const [selection, setSelection] = useState<Selection>(null)
@@ -163,11 +180,11 @@ export default function App() {
     return true
   }, [showMessage])
 
-  const handleNew = useCallback(() => {
-    if (isDirty && !window.confirm('The current model has unsaved changes. Create a new model anyway?')) return
+  const handleNew = useCallback(async () => {
+    if (isDirty && !await confirm('The current model has unsaved changes. Create a new model anyway?', 'Create model')) return
     replaceWorkspaceModel(createBlankModel(), 'node')
     showMessage('Blank model created')
-  }, [isDirty, replaceWorkspaceModel, showMessage])
+  }, [confirm, isDirty, replaceWorkspaceModel, showMessage])
 
   const handleOpen = useCallback(() => fileInputRef.current?.click(), [])
 
@@ -187,12 +204,14 @@ export default function App() {
       if (imported.name === 'Imported frame') {
         imported.name = file.name.replace(/\.json$/i, '')
       }
+      if (isDirty && !await confirm('Replace the current 2D model with this file?', 'Open file')) return
+      if (fileReadTokenRef.current !== fileReadToken) return
       replaceWorkspaceModel(imported)
       showMessage(`Opened ${file.name}`, 'success')
     } catch (error) {
       showMessage(error instanceof Error ? error.message : 'Could not read this model file.', 'error')
     }
-  }, [replaceWorkspaceModel, showMessage])
+  }, [confirm, isDirty, replaceWorkspaceModel, showMessage])
 
   const handleSave = useCallback(() => {
     if (!currentUser) {
@@ -267,6 +286,7 @@ export default function App() {
 
   const handleToolChange = useCallback((tool: ToolMode) => {
     setActiveTool(tool)
+    if (tool !== 'select') setPropertiesCollapsed(false)
     setSelection(null)
     if (tool !== 'material' && tool !== 'section') {
       setAssignmentOverlay(null)
@@ -288,33 +308,33 @@ export default function App() {
     }
   }, [replaceWorkspaceModel, showMessage])
 
-  const handleLoadExample = useCallback((example: ExampleModelDefinition) => {
-    if (isDirty && !window.confirm('The current model has unsaved changes. Load this example anyway?')) return
+  const handleLoadExample = useCallback(async (example: ExampleModelDefinition) => {
+    if (isDirty && !await confirm('The current model has unsaved changes. Load this example anyway?', 'Load example')) return
     replaceWorkspaceModel(structuredClone(example.model))
     showMessage(`Loaded ${example.name}`, 'success')
-  }, [isDirty, replaceWorkspaceModel, showMessage])
+  }, [confirm, isDirty, replaceWorkspaceModel, showMessage])
 
   const handleDeleteHistory = useCallback((id: string) => {
     deleteEntry(id)
   }, [deleteEntry])
 
-  const handleDeleteHistoryGroup = useCallback((source: ModelHistoryEntry['source']) => {
+  const handleDeleteHistoryGroup = useCallback(async (source: ModelHistoryEntry['source']) => {
     const deleted = modelHistory.filter((entry) => entry.source === source)
     if (deleted.length === 0) return
     const label = source === 'saved' ? 'saved models' : 'recent analyses'
-    if (!window.confirm(`Delete all ${deleted.length} ${label}?`)) return
+    if (!await confirm(`Delete all ${deleted.length} ${label}?`, 'Delete')) return
     clearEntries(source)
-  }, [clearEntries, modelHistory])
+  }, [confirm, clearEntries, modelHistory])
 
   const handleDeleteExample = useCallback((id: string) => {
     setExampleModels((current) => current.filter((example) => example.id !== id))
   }, [])
 
-  const handleDeleteAllExamples = useCallback(() => {
+  const handleDeleteAllExamples = useCallback(async () => {
     if (exampleModels.length === 0) return
-    if (!window.confirm(`Delete all ${exampleModels.length} examples?`)) return
+    if (!await confirm(`Delete all ${exampleModels.length} examples?`, 'Delete')) return
     setExampleModels([])
-  }, [exampleModels.length])
+  }, [confirm, exampleModels.length])
 
   const handleCreateExample = useCallback((entry: ModelHistoryEntry) => {
     const example: ExampleModelDefinition = {
@@ -327,14 +347,14 @@ export default function App() {
     showMessage(`${entry.name} added to Example models`, 'success')
   }, [showMessage])
 
-  const handleLogout = useCallback(() => {
-    if (isDirty && !window.confirm('Sign out and discard the unsaved changes on this canvas?')) return
+  const handleLogout = useCallback(async () => {
+    if (isDirty && !await confirm('Sign out and discard the unsaved changes on this canvas?', 'Sign out')) return
     void (async () => {
       if (!await signOut()) return
       setExampleModels(loadExampleModels())
       replaceWorkspaceModel(cloneExample())
     })()
-  }, [isDirty, replaceWorkspaceModel, signOut])
+  }, [confirm, isDirty, replaceWorkspaceModel, signOut])
 
   const handleCloseGuidance = useCallback((dontShowAgain: boolean) => {
     setGuidanceOpen(false)
@@ -363,7 +383,9 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (!active) return
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.isComposing || document.querySelector('[role="dialog"]')) return
       const target = event.target as HTMLElement | null
       if (target?.matches('input, textarea, select, [contenteditable="true"]')) return
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
@@ -384,7 +406,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleOpenGuidance, handleSave, handleToolChange])
+  }, [active, handleOpenGuidance, handleSave, handleToolChange])
 
   useEffect(() => () => {
     analysisAbortRef.current?.abort()
@@ -426,6 +448,7 @@ export default function App() {
       }}
     >
       <TopToolbar
+        onDimensionChange={onDimensionChange}
         modelName={model.name}
         isDirty={isDirty}
         analysisState={analysisState}
@@ -465,15 +488,15 @@ export default function App() {
             md: propertiesCollapsed ? '88px 56px minmax(0, 1fr)' : '88px 380px minmax(0, 1fr)',
           },
           gridTemplateRows: resultsExpanded
-            ? { xs: 'minmax(240px, 1fr) auto minmax(320px, 0.9fr)', md: 'minmax(210px, 38%) minmax(400px, 62%)' }
+            ? { xs: propertiesCollapsed ? 'minmax(0, 1fr) 0 minmax(0, 50%)' : 'minmax(0, 1fr) minmax(0, 35%) minmax(0, 35%)', sm: 'minmax(0, 38%) minmax(0, 62%)', md: 'minmax(210px, 38%) minmax(400px, 62%)' }
             : resultsMinimized
-              ? { xs: 'minmax(280px, 1fr) auto 44px', md: 'minmax(0, 1fr) 44px' }
-              : { xs: 'minmax(280px, 1fr) auto clamp(240px, 28vh, 340px)', md: 'minmax(280px, 1fr) clamp(300px, 30vh, 360px)' },
+              ? { xs: propertiesCollapsed ? 'minmax(0, 1fr) 0 44px' : 'minmax(0, 1fr) minmax(0, 45%) 44px', sm: 'minmax(0, 1fr) 44px' }
+              : { xs: propertiesCollapsed ? 'minmax(0, 1fr) 0 minmax(0, 45%)' : 'minmax(0, 1fr) minmax(0, 30%) minmax(0, 35%)', sm: 'minmax(0, 1fr) clamp(220px, 30vh, 340px)', md: 'minmax(280px, 1fr) clamp(300px, 30vh, 360px)' },
           overflow: 'hidden',
         }}
       >
         <Box sx={{ gridColumn: 1, gridRow: { xs: '1 / -1', md: '1 / 3' }, minHeight: 0, minWidth: 0, display: 'flex', height: '100%' }}>
-          <ToolRail activeTool={activeTool} onToolChange={handleToolChange} />
+          <ToolRail activeTool={activeTool} onToolChange={handleToolChange} onSelectDoubleClick={() => setPropertiesCollapsed(value => !value)} />
         </Box>
 
         <Box
@@ -498,7 +521,7 @@ export default function App() {
             <ModelCanvas
               key={canvasRevision}
               model={model}
-              tool={activeTool}
+              tool={active ? activeTool : 'select'}
               selection={selection}
               result={result}
               activeResult={activeResult}
@@ -590,7 +613,7 @@ export default function App() {
       </Box>
 
       <Snackbar
-        open={Boolean(toast)}
+        open={active && Boolean(toast)}
         autoHideDuration={3200}
         onClose={(_, reason) => {
           if (reason === 'clickaway') return
@@ -609,13 +632,13 @@ export default function App() {
       </Snackbar>
 
       <GuidanceDialog
-        open={guidanceOpen}
+        open={active && guidanceOpen}
         onClose={handleCloseGuidance}
         onJumpToTool={handleToolChange}
       />
 
       <AuthDialog
-        open={authDialogOpen}
+        open={active && authDialogOpen}
         initialMode={authDialogMode}
         onClose={closeAuthDialog}
         onAuthenticated={handleAuthenticated}

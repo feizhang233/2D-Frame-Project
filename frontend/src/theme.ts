@@ -2,44 +2,45 @@ import { createTheme } from '@mui/material/styles'
 
 /**
  * Frame Studio theme — Material UI v7 createTheme.
- * Primary keeps the existing engineering-blue identity.
+ * Shared light-sage palette for the 2D and 3D workspaces.
  */
 export const theme = createTheme({
   cssVariables: true,
   palette: {
     mode: 'light',
     primary: {
-      main: '#405aa6',
-      light: '#6b82c4',
-      dark: '#2c3f7a',
+      main: '#437653',
+      light: '#d9efdf',
+      dark: '#28563a',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#5c6b7a',
-      light: '#8a96a3',
-      dark: '#3d4a56',
+      main: '#62766a',
+      light: '#94ac9c',
+      dark: '#344d3e',
     },
     error: {
       main: '#b63f52',
     },
     success: {
-      main: '#087d68',
+      main: '#33734b',
     },
     warning: {
       main: '#9b6511',
     },
     info: {
-      main: '#405aa6',
+      main: '#437653',
     },
     background: {
-      default: '#eef2f6',
+      default: '#f0f6f1',
       paper: '#ffffff',
     },
-    divider: '#d9e0e9',
+    divider: '#d5e3d8',
     text: {
-      primary: '#202631',
-      secondary: '#667080',
+      primary: '#263b2d',
+      secondary: '#64786a',
     },
+    grey: { 50: '#f6faf7', 100: '#edf5ef', 200: '#deeadf', 300: '#ccdccc' },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
@@ -52,9 +53,25 @@ export const theme = createTheme({
     borderRadius: 10,
   },
   components: {
+    MuiToggleButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          '&.Mui-selected': { backgroundColor: theme.palette.primary.light, color: theme.palette.primary.dark,
+            '&:hover': { backgroundColor: theme.palette.primary.light } },
+        }),
+      },
+    },
     MuiButton: {
       defaultProps: {
         disableElevation: true,
+      },
+      styleOverrides: {
+        containedPrimary: ({ theme }) => ({
+          backgroundColor: theme.palette.primary.light,
+          color: theme.palette.primary.dark,
+          border: `1px solid ${theme.palette.divider}`,
+          '&:hover': { backgroundColor: '#c5e4ce' },
+        }),
       },
     },
     MuiAppBar: {

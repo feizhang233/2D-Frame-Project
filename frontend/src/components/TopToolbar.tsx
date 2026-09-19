@@ -23,8 +23,10 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useState, type ChangeEvent, type MouseEvent, type RefObject } from 'react'
 import type { AuthUser } from '../api/contracts'
+import { DimensionSwitch } from './DimensionSwitch'
 
 interface TopToolbarProps {
+  onDimensionChange: (value: '2D' | '3D') => void
   modelName: string
   isDirty: boolean
   analysisState: 'idle' | 'running' | 'success' | 'error'
@@ -44,7 +46,7 @@ interface TopToolbarProps {
   onLogout: () => void
 }
 
-function BrandMark() {
+export function BrandMark() {
   return (
     <Box
       aria-hidden
@@ -63,8 +65,8 @@ function BrandMark() {
           borderRadius: 0.25,
           opacity: 0.85,
         },
-        '& span:nth-of-type(1)': { width: 4, height: 20, left: 8, top: 8, bgcolor: '#b9c8ff' },
-        '& span:nth-of-type(2)': { width: 17, height: 4, left: 8, top: 8, bgcolor: '#b9c8ff' },
+        '& span:nth-of-type(1)': { width: 4, height: 20, left: 8, top: 8, bgcolor: 'primary.light' },
+        '& span:nth-of-type(2)': { width: 17, height: 4, left: 8, top: 8, bgcolor: 'primary.light' },
         '& span:nth-of-type(3)': { width: 4, height: 20, right: 8, top: 8 },
       }}
     >
@@ -76,6 +78,7 @@ function BrandMark() {
 }
 
 export function TopToolbar({
+  onDimensionChange,
   modelName,
   isDirty,
   analysisState,
@@ -110,6 +113,8 @@ export function TopToolbar({
             </Typography>
           </Box>
         </Stack>
+
+        <DimensionSwitch value="2D" onChange={onDimensionChange} />
 
         <Stack
           direction="row"

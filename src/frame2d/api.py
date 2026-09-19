@@ -22,6 +22,7 @@ from .plotting import (
     render_shear_force_plot,
 )
 from .solver import FrameAnalysisResult, solve_frame
+from frame3d.api import router as frame3d_router
 
 
 def _frontend_dist() -> Path | None:
@@ -548,6 +549,9 @@ def bending_moment_plot(payload: SolveRequest) -> Response:
         headers={"Content-Disposition": 'inline; filename="bending_moment_m.png"'},
     )
 
+
+# Add the independent 3D contract before the SPA catch-all route.
+app.include_router(frame3d_router, prefix="/api/v1/3d")
 
 # Serve the built React workbench when frontend/dist is present.
 _FRONTEND_DIST = _frontend_dist()

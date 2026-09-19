@@ -1,0 +1,54 @@
+{
+  "recorded_date": "2026-09-18",
+  "purpose": "Source trace for frame3d implementation; source-package pass flags are not target-code evidence.",
+  "source_root": "/Users/zhangfei/Documents/Codex/FEA Document/3D-Frame_Math-Core-Guide",
+  "reference_kernel_copied": false,
+  "source_pdfs_reverified_in_this_implementation": false,
+  "sources": [
+    {
+      "id": "INDEX",
+      "path": "Math Logic/3D_CONTENT_INDEX.md",
+      "sha256": "098802b6f5235fd0e72d9a3a760e33c486c0fb6d5204441c1da1d10873c82479"
+    },
+    {
+      "id": "A00",
+      "path": "01_核心算法/00_模型范围与符号约定.md",
+      "sha256": "a2a776dda5f28ad2053d709431d62ea582cb4d4bc29b9a70ceaebcd251ade1cb"
+    },
+    {
+      "id": "A01",
+      "path": "01_核心算法/01_空间坐标与EB单元推导.md",
+      "sha256": "663022ebfb8ad080e1b21c16f0efc4b3829134ef20b4588085a465e116e6fd73"
+    },
+    {
+      "id": "A02",
+      "path": "01_核心算法/02_荷载组装约束释放与内力.md",
+      "sha256": "934f4e01542385f13368d492749975c0b706f2366e1b9e77e51aca84f6d41496"
+    },
+    {
+      "id": "A03",
+      "path": "01_核心算法/03_Timoshenko扩展与锁死.md",
+      "sha256": "eff8db6168e466d166e9e9651a6e475d95607843d89f17a634f728d15162b1ce"
+    },
+    {
+      "id": "L01",
+      "path": "02_算法局限/算法局限与升级边界.md",
+      "sha256": "7920236440e7cce8ce0e2ba3e3213b843486d2bbf347cca98377d6fa026f007c"
+    },
+    {
+      "id": "Q01",
+      "path": "03_验证题目与答案/验证题目.md",
+      "sha256": "d1e110683f1c1963c187e12d68422644bbea90a2e604ab4a343c0717f9e6d514"
+    },
+    {
+      "id": "SOLS",
+      "path": "03_验证题目与答案/配套答案.md",
+      "sha256": "cefc661d0c634317415eda1f4fa95686138a9b096975a31ff6205d13400e2012"
+    },
+    {
+      "id": "V01",
+      "path": "03_验证题目与答案/验证矩阵.md",
+      "sha256": "349998152208e2a4e178f46d7ae2053ba0ac0f7987a9ec2d7bc1123144f850f3"
+    }
+  ]
+}
